@@ -1,8 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  OnModuleInit,
+} from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
 import { CreateOrderDto } from './dto/create-order.dto';
 
 @Injectable()
-export class OrdersService {
+export class OrdersService extends PrismaClient implements OnModuleInit {
+  async onModuleInit() {
+    try {
+      await this.$connect();
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error connecting to the database: ${error.message}`,
+      );
+    }
+  }
+
   create(createOrderDto: CreateOrderDto) {
     return 'This action adds a new order';
   }
