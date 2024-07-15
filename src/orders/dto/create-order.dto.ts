@@ -20,6 +20,7 @@ export class CreateOrderDto {
   @IsEnum(OrderStatusList, {
     message: `Status must be one of the following values: ${OrderStatusList}`,
   })
+  @IsOptional()
   status = OrderStatus.PENDING;
 
   @IsBoolean()

@@ -1,7 +1,7 @@
 import { Controller, ParseIntPipe } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { OrdersService } from './orders.service';
-import { CreateOrderDto } from './dto/create-order.dto';
+import { CreateOrderDto } from './dto/index';
 import { getActionName } from 'src/common/constants';
 
 const ACTIONS = getActionName('order');
@@ -12,6 +12,7 @@ export class OrdersController {
 
   @MessagePattern({ cmd: ACTIONS.create })
   create(@Payload() createOrderDto: CreateOrderDto) {
+    console.log('createOrderDto', createOrderDto);
     return this.ordersService.create(createOrderDto);
   }
 
