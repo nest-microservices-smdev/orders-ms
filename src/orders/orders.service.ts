@@ -1,4 +1,5 @@
 import {
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   OnModuleInit,
@@ -6,6 +7,7 @@ import {
 import { PrismaClient } from '@prisma/client';
 
 import { CreateOrderDto } from './dto/index';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
@@ -26,11 +28,24 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
   }
 
   findAll() {
-    return `This action returns all orders`;
+    return this.order.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
+  async findOne(id: string) {
+    const order = await this.order.findUnique({
+      where: { id },
+    });
+
+    console.log('order', order);
+
+    if (!order) {
+      throw new RpcException({
+        statusCode: HttpStatus.NOT_FOUND,
+        message: `Order with id ${id} not found`,
+      });
+    }
+
+    return order;
   }
 
   changeOrderStatus(id: number) {
