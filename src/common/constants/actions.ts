@@ -2,7 +2,7 @@ enum Actions {
   FindAll = 'findAll',
   FindOne = 'findOne',
   Create = 'create',
-  ChangeOrderStatus = 'ChangeOrderStatus',
+  ChangeOrderStatus = 'changeOrderStatus',
 }
 
 export const getActionName = (entityName: string) => {

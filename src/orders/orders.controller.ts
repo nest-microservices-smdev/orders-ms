@@ -1,10 +1,13 @@
-import { Controller, ParseIntPipe, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, ParseUUIDPipe } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
 import { OrdersService } from './orders.service';
-import { CreateOrderDto } from './dto/index';
+import {
+  CreateOrderDto,
+  OrderPaginationDto,
+  ChangeOrderStatusDto,
+} from './dto/index';
 import { getActionName } from 'src/common/constants';
-import { OrderPaginationDto } from './dto/order-pagination.dto';
 
 const ACTIONS = getActionName('order');
 
@@ -20,6 +23,7 @@ export class OrdersController {
 
   @MessagePattern({ cmd: ACTIONS.findAll })
   findAll(paginationDto: OrderPaginationDto) {
+    console.log('ACTIONS', ACTIONS);
     return this.ordersService.findAll(paginationDto);
   }
 
@@ -29,7 +33,7 @@ export class OrdersController {
   }
 
   @MessagePattern({ cmd: ACTIONS.changeOrderStatus })
-  ChangeOrderStatus(@Payload('id', ParseIntPipe) id: number) {
-    return this.ordersService.changeOrderStatus(id);
+  update(@Payload() changeOrderStatusDto: ChangeOrderStatusDto) {
+    return this.ordersService.changeOrderStatus(changeOrderStatusDto);
   }
 }
