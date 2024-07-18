@@ -12,11 +12,14 @@ import {
   CreateOrderDto,
   OrderPaginationDto,
   ChangeOrderStatusDto,
+  OrderItemDto,
+  OrderItemWithNameDto,
 } from './dto/index';
 import { PaginationResult } from 'src/common/interfaces';
 import { Order } from './entities/order.entity';
 import { PRODUCT_SERVICE } from 'src/config';
 import { firstValueFrom } from 'rxjs';
+import { Product } from 'src/common/interfaces/product-schema.interface';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
@@ -39,7 +42,7 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
   async create(createOrderDto: CreateOrderDto) {
     const productIds = createOrderDto.items.map(({ productId }) => productId);
 
-    let products: any[];
+    let products: Product[];
 
     try {
       products = await firstValueFrom(
@@ -52,20 +55,28 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
       throw new RpcException(error);
     }
 
-    const orderItemsFormatted = [];
-    let totalAmount = 0;
-    let totalItems = 0;
+    const orderItemsFormatted: OrderItemDto[] = [];
+    const orderItemsFormattedWithNames: OrderItemWithNameDto[] = [];
+    let totalAmount: number = 0;
+    let totalItems: number = 0;
 
     createOrderDto.items.forEach(({ productId, quantity }) => {
-      const product = products.find(({ id }) => id === productId);
+      const product: Product = products.find(({ id }) => id === productId);
 
-      const orderItemFormatted = {
+      const orderItemFormatted: OrderItemDto = {
         price: product.price,
         productId,
         quantity,
       };
 
+      const orderItemWithNameProduct: OrderItemWithNameDto = {
+        ...orderItemFormatted,
+        name: product.name,
+      };
+
       orderItemsFormatted.push(orderItemFormatted);
+      orderItemsFormattedWithNames.push(orderItemWithNameProduct);
+
       totalAmount += product.price * quantity;
       totalItems += quantity;
     });
@@ -80,9 +91,21 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
           },
         },
       },
+      include: {
+        OrderItem: {
+          select: {
+            productId: true,
+            quantity: true,
+            price: true,
+          },
+        },
+      },
     });
 
-    return orderCreated;
+    return {
+      ...orderCreated,
+      OrderItem: orderItemsFormattedWithNames,
+    };
   }
 
   async findAll(
