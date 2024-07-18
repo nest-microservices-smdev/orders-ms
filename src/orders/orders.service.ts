@@ -143,6 +143,15 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
   async findOne(id: string) {
     const order = await this.order.findFirst({
       where: { id },
+      include: {
+        OrderItem: {
+          select: {
+            productId: true,
+            quantity: true,
+            price: true,
+          },
+        },
+      },
     });
 
     if (!order) {
@@ -152,7 +161,26 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
       });
     }
 
-    return order;
+    let products: Product[];
+
+    try {
+      products = await firstValueFrom(
+        this.productsClient.send(
+          { cmd: 'product_validate_products' },
+          { ids: order.OrderItem.map(({ productId }) => productId) },
+        ),
+      );
+    } catch (error) {
+      throw new RpcException(error);
+    }
+
+    return {
+      ...order,
+      OrderItem: order.OrderItem.map((orderItem) => ({
+        ...orderItem,
+        name: products.find(({ id }) => id === orderItem.productId).name,
+      })),
+    };
   }
 
   async changeOrderStatus(changeOrderStatusDto: ChangeOrderStatusDto) {
