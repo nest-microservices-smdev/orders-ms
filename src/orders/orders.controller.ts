@@ -17,13 +17,11 @@ export class OrdersController {
 
   @MessagePattern({ cmd: ACTIONS.create })
   create(@Payload() createOrderDto: CreateOrderDto) {
-    console.log('createOrderDto', createOrderDto);
     return this.ordersService.create(createOrderDto);
   }
 
   @MessagePattern({ cmd: ACTIONS.findAll })
   findAll(paginationDto: OrderPaginationDto) {
-    console.log('ACTIONS', ACTIONS);
     return this.ordersService.findAll(paginationDto);
   }
 

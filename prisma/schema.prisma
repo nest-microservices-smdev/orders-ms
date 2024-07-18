@@ -22,7 +22,7 @@ model Order {
   paidAt      DateTime?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  orderItems  OrderItem[]
+  OrderItem   OrderItem[]
 }
 
 model OrderItem {

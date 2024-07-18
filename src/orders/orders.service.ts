@@ -1,11 +1,12 @@
 import {
   HttpStatus,
+  Inject,
   Injectable,
   InternalServerErrorException,
   OnModuleInit,
 } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { RpcException } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 
 import {
   CreateOrderDto,
@@ -14,9 +15,17 @@ import {
 } from './dto/index';
 import { PaginationResult } from 'src/common/interfaces';
 import { Order } from './entities/order.entity';
+import { PRODUCT_SERVICE } from 'src/config';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
+  constructor(
+    @Inject(PRODUCT_SERVICE) private readonly productsClient: ClientProxy,
+  ) {
+    super();
+  }
+
   async onModuleInit() {
     try {
       await this.$connect();
@@ -27,15 +36,53 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
     }
   }
 
-  create(createOrderDto: CreateOrderDto) {
-    return {
-      id: '123',
-      ...createOrderDto,
-    };
+  async create(createOrderDto: CreateOrderDto) {
+    const productIds = createOrderDto.items.map(({ productId }) => productId);
 
-    // return this.order.create({
-    //   data: createOrderDto,
-    // });
+    let products: any[];
+
+    try {
+      products = await firstValueFrom(
+        this.productsClient.send(
+          { cmd: 'product_validate_products' },
+          { ids: productIds },
+        ),
+      );
+    } catch (error) {
+      throw new RpcException(error);
+    }
+
+    const orderItemsFormatted = [];
+    let totalAmount = 0;
+    let totalItems = 0;
+
+    createOrderDto.items.forEach(({ productId, quantity }) => {
+      const product = products.find(({ id }) => id === productId);
+
+      const orderItemFormatted = {
+        price: product.price,
+        productId,
+        quantity,
+      };
+
+      orderItemsFormatted.push(orderItemFormatted);
+      totalAmount += product.price * quantity;
+      totalItems += quantity;
+    });
+
+    const orderCreated = await this.order.create({
+      data: {
+        totalAmount,
+        totalItems,
+        OrderItem: {
+          createMany: {
+            data: orderItemsFormatted,
+          },
+        },
+      },
+    });
+
+    return orderCreated;
   }
 
   async findAll(

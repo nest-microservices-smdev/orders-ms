@@ -3,6 +3,8 @@ import * as joi from 'joi';
 
 interface EnvVars {
   PORT: number;
+  PRODUCTS_MICROSERVICE_URL: string;
+  PRODUCTS_MICROSERVICE_PORT: number;
 }
 
 const envsSchema = joi
@@ -19,4 +21,6 @@ const envVars: EnvVars = value;
 
 export const envs = {
   port: envVars.PORT,
+  productsMicroserviceUrl: envVars.PRODUCTS_MICROSERVICE_URL,
+  productsMicroservicePort: envVars.PRODUCTS_MICROSERVICE_PORT,
 };
