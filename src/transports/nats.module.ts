@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { envs, PRODUCT_SERVICE } from 'src/config';
+import { envs, NATS_SERVICE } from 'src/config';
 
 const natsConfig = ClientsModule.register([
   {
-    name: PRODUCT_SERVICE,
+    name: NATS_SERVICE,
     transport: Transport.NATS,
     options: {
       servers: envs.natsServers,

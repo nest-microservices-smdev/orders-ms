@@ -17,13 +17,13 @@ import {
 } from './dto/index';
 import { PaginationResult } from 'src/common/interfaces';
 import { Order } from './entities/order.entity';
-import { PRODUCT_SERVICE } from 'src/config';
+import { NATS_SERVICE } from 'src/config';
 import { firstValueFrom } from 'rxjs';
 import { Product } from 'src/common/interfaces/product-schema.interface';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
-  constructor(@Inject(PRODUCT_SERVICE) private readonly client: ClientProxy) {
+  constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) {
     super();
   }
 
