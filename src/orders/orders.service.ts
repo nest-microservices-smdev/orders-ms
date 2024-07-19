@@ -23,9 +23,7 @@ import { Product } from 'src/common/interfaces/product-schema.interface';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
-  constructor(
-    @Inject(PRODUCT_SERVICE) private readonly productsClient: ClientProxy,
-  ) {
+  constructor(@Inject(PRODUCT_SERVICE) private readonly client: ClientProxy) {
     super();
   }
 
@@ -46,7 +44,7 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
 
     try {
       products = await firstValueFrom(
-        this.productsClient.send(
+        this.client.send(
           { cmd: 'product_validate_products' },
           { ids: productIds },
         ),
@@ -165,7 +163,7 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
 
     try {
       products = await firstValueFrom(
-        this.productsClient.send(
+        this.client.send(
           { cmd: 'product_validate_products' },
           { ids: order.OrderItem.map(({ productId }) => productId) },
         ),
