@@ -6,6 +6,7 @@ import {
   CreateOrderDto,
   OrderPaginationDto,
   ChangeOrderStatusDto,
+  PaidOrderDto,
 } from './dto/index';
 import { getActionName } from 'src/common/constants';
 
@@ -43,7 +44,7 @@ export class OrdersController {
   }
 
   @EventPattern({ cmd: 'payment.succeeded' })
-  paidOrder(@Payload() paymentOrderDto: any) {
+  paidOrder(@Payload() paymentOrderDto: PaidOrderDto) {
     console.log('Order paid', paymentOrderDto);
   }
 }
