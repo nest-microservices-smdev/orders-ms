@@ -20,6 +20,7 @@ import { Order } from './entities/order.entity';
 import { NATS_SERVICE } from 'src/config';
 import { firstValueFrom } from 'rxjs';
 import { Product } from 'src/common/interfaces/product-schema.interface';
+import { OrderWithProducts } from './interfaces/order-with-products.interface';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
@@ -192,5 +193,24 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
       where: { id },
       data: { status },
     });
+  }
+
+  async createPaymentSession(order: OrderWithProducts) {
+    const paymentSession = await firstValueFrom(
+      this.client.send(
+        { cmd: 'payment.create.session' },
+        {
+          orderId: order.id,
+          currency: 'usd',
+          items: order.OrderItem.map(({ name, price, quantity }) => ({
+            name: name,
+            price: price,
+            quantity: quantity,
+          })),
+        },
+      ),
+    );
+
+    return paymentSession;
   }
 }
