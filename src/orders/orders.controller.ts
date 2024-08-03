@@ -1,5 +1,5 @@
 import { Controller, ParseUUIDPipe } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 
 import { OrdersService } from './orders.service';
 import {
@@ -40,5 +40,10 @@ export class OrdersController {
   @MessagePattern({ cmd: ACTIONS.changeOrderStatus })
   update(@Payload() changeOrderStatusDto: ChangeOrderStatusDto) {
     return this.ordersService.changeOrderStatus(changeOrderStatusDto);
+  }
+
+  @EventPattern({ cmd: 'payment.succeeded' })
+  paidOrder(@Payload() paymentOrderDto: any) {
+    console.log('Order paid', paymentOrderDto);
   }
 }
