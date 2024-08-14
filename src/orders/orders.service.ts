@@ -52,7 +52,10 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
         ),
       );
     } catch (error) {
-      throw new RpcException(error);
+      throw new RpcException({
+        statusCode: 500,
+        messaage: error.message,
+      });
     }
 
     const orderItemsFormatted: OrderItemDto[] = [];
@@ -156,7 +159,7 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
 
     if (!order) {
       throw new RpcException({
-        status: HttpStatus.NOT_FOUND,
+        statusCode: HttpStatus.NOT_FOUND,
         message: `Order with id ${id} not found`,
       });
     }
@@ -171,7 +174,10 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
         ),
       );
     } catch (error) {
-      throw new RpcException(error);
+      throw new RpcException({
+        statusCode: 500,
+        message: error.message,
+      });
     }
 
     return {
