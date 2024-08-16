@@ -53,8 +53,8 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
       );
     } catch (error) {
       throw new RpcException({
-        statusCode: 500,
-        messaage: error.message,
+        statusCode: 400,
+        message: error.message,
       });
     }
 
